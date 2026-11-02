@@ -1,0 +1,1657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+
+  <!-- ⚠ ELEMENT ORDER IS FIXED BY THE SCHEMA and Vortex enforces it strictly (MO2 does not):
+       moduleName -> moduleDependencies -> requiredInstallFiles -> installSteps
+                  -> conditionalFileInstalls
+       Putting requiredInstallFiles after installSteps parses fine as XML but fails Vortex with
+       "Sch_InvalidElementContentExpecting".
+       NO PICTURE (the user's ruling, 2026-10-31: a header picture kept giving users an error
+       message): the schema's optional picture element after moduleName is left out on purpose,
+       no plugin carries one, and the package ships no picture file (package_release.py refuses
+       both). -->
+
+  <moduleName>Precision Physic Bodies</moduleName>
+
+  <!-- Core payload: always installed, nothing to choose.
+       All ten skeletons (four female, three male, the werewolf, the Erin female and male) ship together on purpose — the race map points a race at a
+       skeleton file, and a map entry pointing at a file that was not installed would leave
+       those NPCs without a skeleton. They are ~100 KB each; which races are actually driven
+       is decided by PPB_Skeletons_Added_Race.ini, which the user can edit at any time. -->
+  <requiredInstallFiles>
+    <folder source="00 Core" destination="" priority="0"/>
+  </requiredInstallFiles>
+
+  <installSteps order="Explicit">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Performance: SMP hair & tail rigs on/off.
+         The rigs are gated by ONE knob (npcFollower) in PPB_tuning.txt. Since
+         2.9.0 a SECOND install choice also lives in that file ("PCW (beta)" on
+         the next page: rigWorld / pcwOne / sbWorld), so both choices only set
+         FLAGS (ppbSmpRigs, ppbPcw) and the conditional-install block at the
+         bottom picks ONE generated PPB_tuning.txt ("20 Tuning\<code>"; both On
+         = the core file). The variants AND their patterns are GENERATED from one
+         table at package time (package_release.py) — never hand-edited — so
+         they can not drift apart.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <installStep name="Performance">
+      <optionalFileGroups order="Explicit">
+
+        <group name="SMP hair and tail collision" type="SelectExactlyOne">
+          <plugins order="Explicit">
+
+            <plugin name="On - full experience (recommended)">
+              <description>
+Hair and tails get collision capsules and react to your hands and weapons — on both
+Faster HDT-SMP and HDT-SMP Flex.
+
+Cost is bounded: only the 2 NPCs nearest you (within ~10 m) carry live rigs, and a
+closer NPC takes the slot from a farther one. A dense wig is 85-200 physics bodies,
+which is exactly why that budget exists.
+
+You can tune it later in PPB_tuning.txt: npcRigMaxActors (how many NPCs), npcRigRangeU
+(the range), npcFollower 0 (kill switch, takes effect within a second, no restart).
+              </description>
+              <conditionFlags>
+                <flag name="ppbSmpRigs">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+
+            <plugin name="Off - performance">
+              <description>
+No hair or tail rigs at all: NPC hair and tails will NOT react to your touch, and your
+hand passes through them. Everything else in PPB is unaffected (body capsules, joints,
+touch detection on the body, heel fix).
+
+Pick this on a machine that struggles in crowds. It installs the same PPB_tuning.txt
+with one line changed: npcFollower 0.
+
+You can change your mind any time by editing that line back to 1 — no reinstall needed,
+it takes effect within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbSmpRigs">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Optional features (2026-09-11; FLAGS 2026-09-12; six switches in 2.2.0;
+         seven since 2026-09-23 — the captive moonwalk fix / SetDontMove guard).
+         The switches live in PPB.ini [Features]; each is ANDed with its tuning
+         master, so a user can still flip them by hand later without reinstalling.
+
+         WHY FLAGS: all seven share ONE file. Plain options that each install a
+         PPB.ini would clobber each other (the last one written wins). So every
+         choice here only sets a FLAG and installs nothing; the single matching
+         PPB.ini variant is picked in the conditional-install block at the bottom.
+         The variants AND that block are GENERATED by package_release.py from one
+         table, each variant verified to differ from the core file by exactly the
+         intended keys.
+
+         The four push outcomes are SUB-features of push/shove, so their page is
+         only shown when push is On; with push Off they are moot and no pattern
+         reads their flags.
+
+         2026-09-30 (handover 79): the Havok breast (flag ppbBreast) and the
+         outfit re-dress fix (flag ppbOutfit, its own page, shown only when equip
+         gestures are On) live in a SECOND file, PPB_Options.ini, read after
+         PPB.ini, so the PPB.ini table does not quadruple. Its variants and
+         patterns are generated the same way, into the same block below.
+
+         2026-10-31 (PPB V2.9.0 Beta): "PCW (beta)" (flag ppbPcw, ON by
+         default) lives in PPB_tuning.txt with the Performance page's flag
+         ppbSmpRigs; its variants and patterns are generated the same way.
+         The breast stays its own switch (ppbBreast): with both On the breast
+         runs in her PCW; "Off" for the breast never turns the PCW off.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <installStep name="Optional Features">
+      <optionalFileGroups order="Explicit">
+
+        <group name="Push and shove" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+NPCs react physically when you push them with your hands or a weapon.
+
+Choosing On opens a page where you pick which reactions you want, one by one:
+  - Push walk: a steady press makes the NPC step back.
+  - Push stumble: a firm push makes the NPC stagger.
+  - Shove knockdown: a hard shove knocks the NPC to the ground.
+  - Leg sweep knockdown: sweeping the NPC's feet knocks them down.
+
+Busy NPCs are always left alone: anyone sitting, sleeping, working at a crafting
+station or doing a chore, fighting, or in a kill move. NPCs leaning on a wall, rail
+or counter can't be pushed (they are braced), but their legs can still be swept.
+              </description>
+              <conditionFlags>
+                <flag name="ppbPush">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+Your hands and weapons never push, stagger or knock down an NPC, and sweeping
+their legs does nothing. All four push reactions are off, whatever the next page
+would have said.
+
+The rest of PPB works as usual: body collision, touch sensing, the heel fix, and
+equip gestures if you keep them. You can change this later with bPushShove in
+SKSE/Plugins/PPB.ini. The change applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbPush">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <group name="Equip gestures" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Dress and undress NPCs with your hands:
+  - Equip: hold a piece of clothing or armour against the matching part of the
+    NPC's body for about a second, then let go. It goes on them, and it stays on
+    (their outfit won't swap it back).
+  - Undress: grab something the NPC is wearing with both hands and pull it off.
+
+If that slot is already taken, the item falls instead of silently replacing what
+they wear. No messages pop up on screen.
+
+Choosing On opens a page with one more choice: the outfit re-dress fix.
+              </description>
+              <conditionFlags>
+                <flag name="ppbEquip">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+Holding clothing or armour against an NPC won't equip it, and pulling with both
+hands won't undress them. Pick this if another mod handles equipping by hand for
+you (for example Gift by Hand).
+
+You can change this later with bEquipGestures in SKSE/Plugins/PPB.ini. This one
+is read when the game loads, so it needs a restart.
+              </description>
+              <conditionFlags>
+                <flag name="ppbEquip">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <!-- 2026-09-23 (report 48): the SetDontMove guard as an install choice (user ask 2026-09-22).
+             PPB.ini [Features] bSetDontMoveGuard, ANDed with the tuning dial holdGuard. Independent of
+             push and equip, so it is read by every generated pattern. -->
+        <group name="Captive moonwalk fix" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Captive and prisoner mods freeze an NPC in place with SetDontMove. In VR that
+freeze breaks the first time she is knocked down: she keeps playing a walk
+against a body that cannot move, and slides on the spot. This is the "moonwalk".
+
+On: PPB refuses that freeze on the NPCs it drives (people only; the player,
+creatures and horses are never touched). On its own this lets a captive walk
+free instead of moonwalking. A restraint mod that works with PPB can then keep
+her in place with physics instead, so she still stands, falls and gets back up
+like anyone else.
+
+Captives who are restrained (SetRestrained) stay restrained either way - PPB
+never removes that.
+
+You can change this later with bSetDontMoveGuard in SKSE/Plugins/PPB.ini. The
+change applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbGuard">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+Captive and prisoner mods freeze NPCs exactly as they do without PPB, and a
+captive knocked down while frozen can moonwalk.
+
+Note: a restraint mod that works with PPB and depends on this fix turns it back
+on when it is installed, whatever you pick here.
+
+The rest of PPB works as usual. You can change this later with bSetDontMoveGuard
+in SKSE/Plugins/PPB.ini. The change applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbGuard">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <!-- 2026-10-31 (PPB V2.9.0 Beta; the user's H3-a: ON by default, H1-a: its own choice beside the breast). The
+             PCW = her private physics world. PPB_tuning.txt rigWorld / pcwOne / sbWorld (On 1 / 2 / 2, Off 0 / 0 / 1),
+             set by the TUNE table with ppbSmpRigs. Read by every generated PPB_tuning.txt pattern. -->
+        <group name="PCW (beta) - physics on your other CPU cores" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+BETA. Each woman who has PPB's Havok breast (the next choice) gets a private
+physics world of her own, a PCW, stepped on your other CPU cores instead of
+the game's physics thread. Her breast reacts to your hands, weapons and held
+objects exactly as it does in the game's physics.
+
+Today the PCW carries the Havok breast. Havok Converter (optional, coming
+later) will move converted hair and clothes into the same world, which is
+where most of the saving comes from. You do not need it for this beta.
+
+Needs Engine Fixes VR with bOverrideHavokMemorySystem = true in its
+EngineFixes.toml. Without it PPB writes why in PPB.log and the breast runs in
+the game's physics instead; nothing else changes.
+
+Testers: type pcwab in the console once (about 4 minutes, standing still
+near your followers) and send the log files listed on the beta page.
+
+You can change this later in SKSE/Plugins/PPB_tuning.txt: rigWorld 0,
+pcwOne 0 and sbWorld 1 turn it off (rigWorld 1, pcwOne 2, sbWorld 2 = on).
+The change applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbPcw">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+No private physics worlds. If you keep the Havok breast, it runs in the
+game's own physics, on the game's physics thread. Everything else in PPB is
+unaffected.
+
+Pick this if a stutter or crash goes away with the PCW off - and please tell
+us, with your logs.
+
+It installs the same PPB_tuning.txt with three lines changed: rigWorld 0,
+pcwOne 0, sbWorld 1. Set them back to 1, 2, 2 any time; the change applies
+within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbPcw">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <!-- 2026-09-30 (handover 79): PPB's own Havok breast as an install choice. PPB_Options.ini [Features]
+             bHavokBreast (a missing key = OFF), ANDed with the tuning master sbEnabled. Read by every generated
+             PPB_Options.ini pattern. -->
+        <group name="Havok breast" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+PPB builds its own Havok breast physics for every woman on a PPB skeleton
+(human, elf, orc, Yvanni, khajiit, argonian).
+
+A touch dents the breast, a firmer push moves it, and a deeper push moves her.
+It collides with your hands, the objects you hold and Havok hair.
+
+With PCW (beta) On it runs in her private physics world on your other CPU
+cores; with PCW (beta) Off, in the game's own physics.
+
+It drives CBBE / 3BA bodies (and their outfits) and GT Softbody bodies. While a
+woman has it, her CBPC breast physics are paused and GT Softbody's breast XML is
+switched to a kinematic copy. Both are given back when she has none.
+
+You can change this later with bHavokBreast in SKSE/Plugins/PPB_Options.ini.
+The change applies within a second, even mid-game.
+
+Kinematic physics file derived from GT Softbody by Goutou (Nexus 152103), used
+with credit under its modification permission.
+              </description>
+              <conditionFlags>
+                <flag name="ppbBreast">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+PPB builds no breast physics of its own: your own breast physics (CBPC, SMP,
+GT Softbody) run exactly as before.
+
+The PCW (beta) choice is not changed by this one. With no Havok breast and no
+Havok Converter, the PCW has nothing to carry yet.
+
+The rest of PPB works as usual. You can change this later with bHavokBreast in
+SKSE/Plugins/PPB_Options.ini. The change applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbBreast">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+    <!-- 2.2.0: the four push outcomes as separate choices (user, 2026-09-12). Each maps to one PPB.ini key and is hot. -->
+    <installStep name="Push and Shove Options">
+      <visible>
+        <flagDependency flag="ppbPush" value="On"/>
+      </visible>
+      <optionalFileGroups order="Explicit">
+
+        <group name="Push walk" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Press your hand or weapon steadily against an NPC and they step back, away from
+your hand, for as long as you keep pressing. They stop when you stop.
+This is the gentle end of pushing: moving someone out of your way.
+
+PPB.ini key: bPushWalk. Applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbWalk">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+A steady press doesn't move the NPC. Your hand still collides with them and
+touch is still sensed, and the stumble, shove knockdown and leg sweep work as
+you choose below.
+
+PPB.ini key: bPushWalk.
+              </description>
+              <conditionFlags>
+                <flag name="ppbWalk">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <group name="Push stumble" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Push an NPC firmly enough to bend them backwards and they stumble: the game's
+own stagger animation, turned to match the direction you pushed from.
+
+If you turn Shove knockdown off but keep this on, a hard shove also makes them
+stumble instead of falling.
+
+PPB.ini key: bPushStumble. Applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbStumble">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+A firm push never makes an NPC stagger. The walk, shove knockdown and leg sweep
+are not affected.
+
+PPB.ini key: bPushStumble.
+              </description>
+              <conditionFlags>
+                <flag name="ppbStumble">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <group name="Shove knockdown (ragdoll)" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Shove an NPC hard and they're knocked off their feet: they go limp (ragdoll),
+fall, and get back up on their own.
+
+PPB.ini key: bShoveRagdoll. Applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbRagdoll">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+A shove never knocks an NPC down. With Push stumble on, a hard shove makes them
+stumble instead. With both off, a hard shove does nothing.
+
+This does NOT turn off the leg sweep. That is its own choice, below.
+
+PPB.ini key: bShoveRagdoll.
+              </description>
+              <conditionFlags>
+                <flag name="ppbRagdoll">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+        <group name="Leg sweep knockdown (ragdoll)" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+Sweep or lift an NPC's feet off the floor with your hand or a weapon and they fall
+(ragdoll), like a real person would. Both feet have to leave the floor: lifting one
+leg while the other stays planted doesn't trip them.
+
+It never trips an NPC who runs at full speed, and not for half a second after
+an NPC is moved more than about 100 units at once (a follower mod's catch-up
+teleport); pushes wait that half second too.
+
+This works on NPCs leaning on walls, rails or counters too: leaning braces them
+against a push, not against a sweep. It is also the part of push/shove most likely
+to clash with other physics or animation mods. If NPCs fall when they shouldn't,
+turn it off.
+
+PPB.ini key: bFeetLift. Applies within a second, even mid-game.
+              </description>
+              <conditionFlags>
+                <flag name="ppbFeet">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+Lifting or sweeping an NPC's feet never knocks them down. The walk, stumble and
+shove knockdown are not affected.
+
+PPB.ini key: bFeetLift.
+              </description>
+              <conditionFlags>
+                <flag name="ppbFeet">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+    <!-- 2026-09-30 (handover 79): OutfitGuard as a sub-option of the equip gestures (user). PPB_Options.ini [Features]
+         bOutfitGuard (a missing key = ON). Shown only when equip gestures are On; with them Off it is moot, no pattern
+         reads ppbOutfit, and the outfit-guard-on variant installs. -->
+    <installStep name="Equip Gesture Options">
+      <visible>
+        <flagDependency flag="ppbEquip" value="On"/>
+      </visible>
+      <optionalFileGroups order="Explicit">
+
+        <group name="Outfit re-dress fix" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="On (recommended)">
+              <description>
+An NPC whose last piece of clothing you took off with the two-hand undress, or a
+generic NPC you dressed with a press-to-equip, is not re-dressed in her default
+outfit by the game until she wears something new.
+
+PPB_Options.ini key: bOutfitGuard. It is set up when the game starts, so a
+change needs a game restart.
+              </description>
+              <conditionFlags>
+                <flag name="ppbOutfit">On</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Recommended"/></typeDescriptor>
+            </plugin>
+            <plugin name="Off">
+              <description>
+The game's own outfit rules apply: an NPC you undressed or dressed by hand can
+be put back in her default outfit by the game. The equip gestures themselves
+work as usual.
+
+PPB_Options.ini key: bOutfitGuard. A change needs a game restart.
+              </description>
+              <conditionFlags>
+                <flag name="ppbOutfit">Off</flag>
+              </conditionFlags>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Sibling-mod compatibility — ONE option, and it writes a file that
+         belongs to another mod, so it is opt-in and says plainly what it
+         overwrites.
+         PPB deliberately ships NO copy of higgs_vr.ini, activeragdoll.ini or
+         NextGenDecapitations.ini. Replacing a user's whole config to change one
+         line is not a trade worth making, and the NGD file only ever differed
+         by a debug log level.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════════════════
+         OStrands bridge (added 2026-11-02): PPB_OStrands.dll + PPB_OStrands.esp
+         + decal textures + PPB_OStrands.ini, all in "40 OStrands Bridge".
+         Source and build notes: OStrandsBridge/ in the repository.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <installStep name="OStrands">
+      <optionalFileGroups order="Explicit">
+
+        <group name="OStrands bridge" type="SelectAny">
+          <plugins order="Explicit">
+
+            <plugin name="OStrands climax from PPB stroking + NPC decals">
+              <description>
+REQUIRES OStrands 0.8.0 (0_OStrands.dll) and OStim Standalone or SexLab (OStrands' own requirement).
+
+PPB raises your schlong while your hand is on it. With this installed, STROKING it - your hand
+travelling along the raised shaft - fills a meter; when it is full, OStrands climaxes you with its
+real semen simulation, outside any scene. Every actor near you is handed to OStrands as a collision
+body, so the fluid lands on them instead of passing through.
+
+The spurts' path is also swept, and every NPC it reaches gets a semen decal (the game's own skinned
+decals, like blood).
+
+How much stroking, the decal range and the rest are in SKSE/Plugins/PPB_OStrands.ini (hot: edits
+apply within a second).
+
+ONE SETTING IN OSTRANDS: set [Semen] Enabled = true in OStrands_User.ini (or on its SKSE Menu
+Framework page). On "auto" without OCum, OStrands only allows semen in SexLab scenes.
+
+Adds one plugin: PPB_OStrands.esp (three forms, no masters).
+              </description>
+              <files>
+                <folder source="40 OStrands Bridge" destination="" priority="0"/>
+              </files>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+    <installStep name="Compatibility Patch">
+      <optionalFileGroups order="Explicit">
+
+        <group name="Dismembering Framework" type="SelectAny">
+          <plugins order="Explicit">
+
+            <plugin name="Dismembering Framework - VR freeze fix">
+              <description>
+INSTALL THIS IF YOU USE DISMEMBERING FRAMEWORK. Skip it otherwise.
+
+Fixes the hard freeze when one NPC dismembers another. That freeze is a thread deadlock:
+DF cuts on a worker thread that needs the SKSE task queue, while the main thread holds the
+same lock inside the death-frame gear-attach and skinning pass. It predates PPB.
+
+This installs an override for DismemberingFramework.ini that turns DF's threaded hit
+processing OFF, which makes the deadlock structurally impossible. PPB then supplies the
+death confirmation DF loses that way, by calling DF's own public API on the main thread.
+DF keeps all of its own conditions, chances, sounds and limb physics.
+
+The file is stock DF settings with exactly ONE value changed:
+    bDeferredHitProcess = 0     (DF default: 1)
+
+OVERWRITES: SKSE/Plugins/DismemberingFramework.ini — if you have tuned DF yourself, copy
+that one line into your own file instead of installing this.
+
+If you use DF and do NOT apply this, open PPB_tuning.txt and set dgDeathCut 0, or you may
+get doubled cuts.
+              </description>
+              <files>
+                <folder source="10 Dismembering Framework fix" destination="" priority="0"/>
+              </files>
+              <typeDescriptor><type name="Optional"/></typeDescriptor>
+            </plugin>
+
+          </plugins>
+        </group>
+
+      </optionalFileGroups>
+    </installStep>
+
+  </installSteps>
+
+  <!-- ⚠ The block below is REWRITTEN by package_release.py on every pack (2.2.0): one PPB.ini variant per
+       non-default combination of the seven feature flags, generated from the same table that writes the
+       "30 Features\<code>" folders, plus (2026-09-30) one PPB_Options.ini variant per Havok breast /
+       outfit re-dress choice, generated from the table that writes the "31 Options\<code>" folders, plus
+       (2026-10-31) one PPB_tuning.txt variant per non-default SMP rigs / PCW (beta) pair, generated from the
+       TUNE table that writes the "20 Tuning\<code>" folders. Hand edits here are overwritten. -->
+  <conditionalFileInstalls>
+    <!-- GENERATED by package_release.py from its three tables - do not hand-edit.
+         (1) One PPB.ini variant per non-default feature choice ("30 Features"); mutually exclusive by construction
+         (every row fixes ppbPush, ppbEquip and ppbGuard; push=On rows also fix all four outcome flags,
+         push=Off rows never read them). Everything ON matches no row = the core PPB.ini.
+         (2) One PPB_Options.ini variant for EVERY choice ("31 Options"; there is no core copy): every row fixes
+         ppbEquip and ppbBreast; equip=On rows also fix ppbOutfit, equip=Off rows never read it and install
+         the outfit-guard-on variant.
+         (3) One PPB_tuning.txt variant per non-default pair of ppbSmpRigs / ppbPcw ("20 Tuning"); every row fixes
+         both flags. Both On matches no row = the core PPB_tuning.txt. -->
+    <patterns>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push0_walk1_stumble1_ragdoll1_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep1_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep0_equip1_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push0_walk1_stumble1_ragdoll1_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep1_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep0_equip0_guard1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push0_walk1_stumble1_ragdoll1_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep1_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep0_equip1_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push0_walk1_stumble1_ragdoll1_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll1_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble1_ragdoll0_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll1_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="On"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk1_stumble0_ragdoll0_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll1_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="On"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble1_ragdoll0_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="On"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll1_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="On"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep1_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbPush" value="On"/>
+          <flagDependency flag="ppbWalk" value="Off"/>
+          <flagDependency flag="ppbStumble" value="Off"/>
+          <flagDependency flag="ppbRagdoll" value="Off"/>
+          <flagDependency flag="ppbFeet" value="Off"/>
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbGuard" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="30 Features\push1_walk0_stumble0_ragdoll0_sweep0_equip0_guard0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbBreast" value="On"/>
+          <flagDependency flag="ppbOutfit" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast1_outfit1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbBreast" value="On"/>
+          <flagDependency flag="ppbOutfit" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast1_outfit0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbBreast" value="Off"/>
+          <flagDependency flag="ppbOutfit" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast0_outfit1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="On"/>
+          <flagDependency flag="ppbBreast" value="Off"/>
+          <flagDependency flag="ppbOutfit" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast0_outfit0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbBreast" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast1_outfit1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbEquip" value="Off"/>
+          <flagDependency flag="ppbBreast" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="31 Options\breast0_outfit1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbSmpRigs" value="On"/>
+          <flagDependency flag="ppbPcw" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="20 Tuning\rigs1_pcw0" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbSmpRigs" value="Off"/>
+          <flagDependency flag="ppbPcw" value="On"/>
+        </dependencies>
+        <files>
+          <folder source="20 Tuning\rigs0_pcw1" destination="" priority="1"/>
+        </files>
+      </pattern>
+      <pattern>
+        <dependencies operator="And">
+          <flagDependency flag="ppbSmpRigs" value="Off"/>
+          <flagDependency flag="ppbPcw" value="Off"/>
+        </dependencies>
+        <files>
+          <folder source="20 Tuning\rigs0_pcw0" destination="" priority="1"/>
+        </files>
+      </pattern>
+    </patterns>
+  </conditionalFileInstalls>
+
+</config>

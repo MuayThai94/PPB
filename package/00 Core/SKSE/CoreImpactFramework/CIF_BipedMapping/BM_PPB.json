@@ -1,0 +1,522 @@
+{
+    "BipedMapping": [
+        {
+            "Filters": {
+                "Skeletons": [
+                    "Actors\\Character\\Character Assets Female\\PPB\\skeleton_female.nif",
+                    "Actors\\Character\\Character Assets Female\\PPB\\skeleton_female_draenei.nif",
+                    "Actors\\Character\\Character Assets\\PPB\\skeleton.nif",
+                    "Actors\\Erin\\PPB\\skeleton_female.nif",
+                    "Actors\\Erin\\Male\\PPB\\skeleton.nif"
+                ]
+            },
+            "BipedBones": {
+                "Head": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        30,
+                        31,
+                        41,
+                        42,
+                        43
+                    ],
+                    "Nodes": [
+                        "NPC Head [Head]",
+                        "NPC Neck [Neck]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "Torso": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        32
+                    ],
+                    "Nodes": [
+                        "NPC Spine [Spn0]",
+                        "NPC Spine1 [Spn1]",
+                        "NPC Spine2 [Spn2]",
+                        "NPC COM [COM ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [LUar]"
+                    ]
+                },
+                "ArmLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L Forearm [LLar]",
+                        "NPC L Hand [LHnd]"
+                    ]
+                },
+                "ArmLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [LUar]",
+                        "NPC L Forearm [LLar]",
+                        "NPC L Hand [LHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]"
+                    ]
+                },
+                "ArmRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ]
+                },
+                "ArmRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]",
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]"
+                    ]
+                },
+                "LegLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ]
+                },
+                "LegLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]",
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [RThg]"
+                    ]
+                },
+                "LegRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Calf [RClf]",
+                        "NPC R Foot [Rft ]"
+                    ]
+                },
+                "LegRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [RThg]",
+                        "NPC R Calf [RClf]",
+                        "NPC R Foot [Rft ]"
+                    ],
+                    "IsLimbEntry": true
+                }
+            }
+        },
+        {
+            "Filters": {
+                "Skeletons": [
+                    "Actors\\Character\\Character Assets Female\\PPB\\skeletonbeast_female.nif",
+                    "Actors\\Character\\Character Assets Female\\PPB\\skeletonbeast_female_khajiit.nif",
+                    "Actors\\Character\\Character Assets\\PPB\\skeletonbeast.nif",
+                    "Actors\\Character\\Character Assets\\PPB\\skeletonbeast_khajiit.nif"
+                ]
+            },
+            "BipedBones": {
+                "Head": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        30,
+                        31,
+                        41,
+                        42,
+                        43
+                    ],
+                    "Nodes": [
+                        "NPC Head [Head]",
+                        "NPC Neck [Neck]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "Torso": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        32
+                    ],
+                    "Nodes": [
+                        "NPC Spine [Spn0]",
+                        "NPC Spine1 [Spn1]",
+                        "NPC Spine2 [Spn2]",
+                        "NPC COM [COM ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [LUar]"
+                    ]
+                },
+                "ArmLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L Forearm [LLar]",
+                        "NPC L Hand [LHnd]"
+                    ]
+                },
+                "ArmLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [LUar]",
+                        "NPC L Forearm [LLar]",
+                        "NPC L Hand [LHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]"
+                    ]
+                },
+                "ArmRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ]
+                },
+                "ArmRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]",
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]"
+                    ]
+                },
+                "LegLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ]
+                },
+                "LegLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]",
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [RThg]"
+                    ]
+                },
+                "LegRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Calf [RClf]",
+                        "NPC R Foot [Rft ]"
+                    ]
+                },
+                "LegRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [RThg]",
+                        "NPC R Calf [RClf]",
+                        "NPC R Foot [Rft ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "Tail": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        40
+                    ],
+                    "Nodes": [
+                        "TailBone01",
+                        "TailBone02",
+                        "TailBone03",
+                        "TailBone04",
+                        "TailBone05"
+                    ],
+                    "IsLimbEntry": true
+                }
+            }
+        },
+        {
+            "Filters": {
+                "Skeletons": [
+                    "Actors\\WerewolfBeast\\Character Assets\\PPB\\skeleton.nif"
+                ]
+            },
+            "BipedBones": {
+                "Head": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        30,
+                        31,
+                        41,
+                        42,
+                        43
+                    ],
+                    "Nodes": [
+                        "NPC Head [Head]",
+                        "NPC Neck [Neck]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "Torso": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        32
+                    ],
+                    "Nodes": [
+                        "NPC Spine [Spn0]",
+                        "NPC Spine1 [Spn1]",
+                        "NPC Spine2 [Spn2]",
+                        "NPC COM [COM ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [RUar]"
+                    ]
+                },
+                "ArmLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L Forearm [RLar]",
+                        "NPC L Hand [RHnd]"
+                    ]
+                },
+                "ArmLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC L UpperArm [RUar]",
+                        "NPC L Forearm [RLar]",
+                        "NPC L Hand [RHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "ArmRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]"
+                    ]
+                },
+                "ArmRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ]
+                },
+                "ArmRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        33
+                    ],
+                    "Nodes": [
+                        "NPC R UpperArm [RUar]",
+                        "NPC R Forearm [RLar]",
+                        "NPC R Hand [RHnd]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegLeftUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]"
+                    ]
+                },
+                "LegLeftLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ]
+                },
+                "LegLeft": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC L Thigh [LThg]",
+                        "NPC L Calf [LClf]",
+                        "NPC L Foot [Lft ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "LegRightUpper": {
+                    "Priority": 20,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [LThg]"
+                    ]
+                },
+                "LegRightLower": {
+                    "Priority": 30,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Calf [LClf]",
+                        "NPC R Foot [Lft ]"
+                    ]
+                },
+                "LegRight": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        37
+                    ],
+                    "Nodes": [
+                        "NPC R Thigh [LThg]",
+                        "NPC R Calf [LClf]",
+                        "NPC R Foot [Lft ]"
+                    ],
+                    "IsLimbEntry": true
+                },
+                "Tail": {
+                    "Priority": 10,
+                    "BipedSlots": [
+                        40
+                    ],
+                    "Nodes": [
+                        "TailBone01",
+                        "TailBone02",
+                        "TailBone03",
+                        "TailBone04",
+                        "TailBone05"
+                    ],
+                    "IsLimbEntry": true
+                }
+            }
+        }
+    ]
+}

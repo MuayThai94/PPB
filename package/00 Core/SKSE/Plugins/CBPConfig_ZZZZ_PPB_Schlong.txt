@@ -1,0 +1,58 @@
+# PPB erect-stiffness override (2026-08-22). ZZZZ out-ranks SPS's ZZZ (CBPC resolves
+# same-named params alphabetically-last). User: "the end moves left and right a bit too
+# much... I would like it more stiff." SPS shipped stiffness 0.022 / damping 0.040 /
+# maxoffset 4 - a soft wide wobble. These raise the spring, kill the oscillation, and
+# halve the allowed tip travel. Dial here; flaccid dangle is SMP (MaleGenitals.xml),
+# untouched by this file.
+#
+# 2026-09-12 maxoffset 1.5 -> 4 (back to SPS). maxoffset is ISOTROPIC - this CBPC build has no
+# per-axis variant - so halving it for the side-to-side wobble ALSO capped travel along the
+# shaft: the erect state could not extend and the tip telescoped back into the mesh (user,
+# 2026-09-12). If lateral wobble returns, lower linearX/linearZ (the lateral axes) and leave
+# linearY (the shaft's own axis; PPA: LocalForwardAxis [0,1,0]) alone. Stiffness/damping kept.
+UBEPS01.stiffness 0.15
+UBEPS02.stiffness 0.15
+UBEPS03.stiffness 0.15
+UBEPS04.stiffness 0.15
+UBEPS05.stiffness 0.15
+UBEPS06.stiffness 0.15
+
+UBEPS01.stiffness2 0.30
+UBEPS02.stiffness2 0.30
+UBEPS03.stiffness2 0.30
+UBEPS04.stiffness2 0.30
+UBEPS05.stiffness2 0.30
+UBEPS06.stiffness2 0.30
+
+UBEPS01.damping 0.20
+UBEPS02.damping 0.20
+UBEPS03.damping 0.20
+UBEPS04.damping 0.20
+UBEPS05.damping 0.20
+UBEPS06.damping 0.20
+
+UBEPS01.maxoffset 4
+UBEPS02.maxoffset 4
+UBEPS03.maxoffset 4
+UBEPS04.maxoffset 4
+UBEPS05.maxoffset 4
+UBEPS06.maxoffset 4
+
+# === 2026-09-16 (user ruling): the schlong must NOT be pushed around by CBPC collisions. ===
+# The hand/body colliders still EXIST (CBPC's own CBPCollisionConfig gives Gen01 a sphere pair), but
+# their push strength on the six schlong bones is zeroed, so CBPC keeps gravity/stiffness/erect
+# behaviour and stops moving the shaft when a hand brushes it. PPB's wand stays the only thing that
+# senses touch there. Set these back to 1.0 to restore the stock reaction.
+
+UBEPS01.collisionMultipler 0.0
+UBEPS02.collisionMultipler 0.0
+UBEPS03.collisionMultipler 0.0
+UBEPS04.collisionMultipler 0.0
+UBEPS05.collisionMultipler 0.0
+UBEPS06.collisionMultipler 0.0
+UBEPS01.collisionMultiplerRot 0.0
+UBEPS02.collisionMultiplerRot 0.0
+UBEPS03.collisionMultiplerRot 0.0
+UBEPS04.collisionMultiplerRot 0.0
+UBEPS05.collisionMultiplerRot 0.0
+UBEPS06.collisionMultiplerRot 0.0

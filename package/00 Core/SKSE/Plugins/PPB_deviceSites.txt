@@ -1,0 +1,34 @@
+# PPB per-device equip-site overrides (2026-08-30). One line per device:
+#   <formid>~<plugin> = <site>|<site>...
+# Sites: vaginal anal mouth wrist ankle neck head eyes chest nipple waist hand finger foot torso all
+# Key = the RENDERED half's defining FormID (the AddOn's DD_Device_Site_Table key).
+# Parsed once per game launch. Unknown records are logged and skipped.
+
+# "Rope Corseted Binds" x4 - user: corsets, rope around the belly, really small -> waist only
+04E8BF~Devious Devices - Expansion.esm = waist
+0509E1~Devious Devices - Expansion.esm = waist
+051FA1~Devious Devices - Expansion.esm = waist
+052547~Devious Devices - Expansion.esm = waist
+
+# Harness (Corset) family - user review: also equip from the neck
+A1008C~Devious Devices - Expansion.esm = torso|neck
+A1008E~Devious Devices - Expansion.esm = torso|neck
+A10090~Devious Devices - Expansion.esm = torso|neck
+A10095~Devious Devices - Expansion.esm = torso|neck
+A10097~Devious Devices - Expansion.esm = torso|neck
+A10099~Devious Devices - Expansion.esm = torso|neck
+A10010~Devious Devices - Expansion.esm = torso|neck
+A10012~Devious Devices - Expansion.esm = torso|neck
+A10020~Devious Devices - Expansion.esm = torso|neck
+A10032~Devious Devices - Expansion.esm = torso|neck
+
+# Butterfly binders x6 - user: "they fold the arm on itself on each side" -> arms only
+A1009E~Devious Devices - Expansion.esm = wrist
+A100A6~Devious Devices - Expansion.esm = wrist
+A100A8~Devious Devices - Expansion.esm = wrist
+A100B1~Devious Devices - Expansion.esm = wrist
+A100B3~Devious Devices - Expansion.esm = wrist
+A100B5~Devious Devices - Expansion.esm = wrist
+
+# Iron Prisoner Chains - user: "almost anywhere on the body"
+0048C9~Devious Devices - Contraptions.esm = all
