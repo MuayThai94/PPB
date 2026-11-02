@@ -31,6 +31,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(CommonLibSSE)
 
+# CommonLibVR only includes its plugin helper itself when it links a prebuilt bundle; on a source build (e.g. the
+# bundle was made with a different MSVC toolset) the consumer has to pull add_commonlibsse_plugin() in.
+if(NOT COMMAND add_commonlibsse_plugin)
+	include("${commonlibsse_SOURCE_DIR}/cmake/CommonLibSSE.cmake")
+endif()
+
 add_commonlibsse_plugin(
 	${PROJECT_NAME}
 	NAME "PPB_OStrands"
