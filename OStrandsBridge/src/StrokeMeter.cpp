@@ -49,7 +49,7 @@ namespace PPBOS::StrokeMeter
 
 		// The gripping zone: the shaft segment, extended a little past both ends so a hand sliding over the tip
 		// or pressing at the base still counts as on it.
-		const float margin = std::min(2.0f, s->length * 0.2f);
+		const float margin = (std::min)(2.0f, s->length * 0.2f);
 		const auto  segA = s->base - s->dir * margin;
 		const auto  segB = s->tip + s->dir * margin;
 		const float grip2 = cfg.gripRadiusU * cfg.gripRadiusU;
@@ -90,7 +90,7 @@ namespace PPBOS::StrokeMeter
 			g_meter += travel;
 			g_lastStroke = a_now;
 		} else if (a_now - g_lastStroke > cfg.decayDelaySec) {
-			g_meter = std::max(0.0f, g_meter - cfg.decayPerSec * a_dt);
+			g_meter = (std::max)(0.0f, g_meter - cfg.decayPerSec * a_dt);
 		}
 
 		if (cfg.debugLog && a_now - g_lastLog >= 1.0f && (g_meter > 0.0f || g_hand[0].gripping || g_hand[1].gripping)) {
@@ -105,7 +105,7 @@ namespace PPBOS::StrokeMeter
 			StartCooldown(a_now);
 			a_onClimax(m);
 		} else if (CoolingDown(a_now)) {
-			g_meter = std::min(g_meter, cfg.climaxStrokeU * 0.5f);  // stroking during the refractory period builds slowly
+			g_meter = (std::min)(g_meter, cfg.climaxStrokeU * 0.5f);  // stroking during the refractory period builds slowly
 		}
 	}
 }

@@ -89,7 +89,7 @@ namespace PPBOS
 		void MainTick()
 		{
 			const float now = Now();
-			const float dt = std::min(now - g_lastTick, 0.25f);
+			const float dt = (std::min)(now - g_lastTick, 0.25f);
 			g_lastTick = now;
 
 			HotReload(now);

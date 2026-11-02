@@ -176,7 +176,7 @@ namespace PPBOS::OStrandsLink
 
 		PairVec   pairs;  // empty: "no penetration" - OStrands spurts freely from the tip
 		HandleVec bodies;
-		bodies.reserve(std::min<std::size_t>(a_bodies.size(), 64));
+		bodies.reserve((std::min<std::size_t>)(a_bodies.size(), 64));
 		for (auto* b : a_bodies) {
 			if (b && bodies.size() < 64) {
 				bodies.push_back(b->GetHandle().native_handle());

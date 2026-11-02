@@ -103,7 +103,7 @@ namespace PPBOS::PathDecals
 			}
 
 			const float gravity = cfg.gravity > 0.0f ? cfg.gravity : Settings::Get().ostrands.gravity;
-			const float speed = cfg.launchSpeedU * std::max(0.25f, 1.0f - cfg.pulseFalloff * static_cast<float>(a_pulse));
+			const float speed = cfg.launchSpeedU * (std::max)(0.25f, 1.0f - cfg.pulseFalloff * static_cast<float>(a_pulse));
 			constexpr float step = 1.0f / 120.0f;
 			const float range2 = cfg.decalRangeU * cfg.decalRangeU;
 
@@ -158,7 +158,7 @@ namespace PPBOS::PathDecals
 			}
 			if (cfg.debugLog) {
 				logger::info("PULSE {} speed {:.0f}u/s: {} ray(s) hit, {} decal(s), {} actor(s) in range",
-					a_pulse, speed, hits.size(), std::min<int>(placed, cfg.maxDecalsPerPulse), actors.size());
+					a_pulse, speed, hits.size(), (std::min<int>)(placed, cfg.maxDecalsPerPulse), actors.size());
 			}
 		}
 	}
@@ -191,7 +191,7 @@ namespace PPBOS::PathDecals
 		if (!cfg.decals || !g_set) {
 			return;
 		}
-		const int pulses = cfg.pulses > 0 ? cfg.pulses : std::max(1, cfg.ostrands.pulses);
+		const int pulses = cfg.pulses > 0 ? cfg.pulses : (std::max)(1, cfg.ostrands.pulses);
 		for (int i = 0; i < pulses; ++i) {
 			g_due.emplace_back(a_now + 0.15f + cfg.pulseIntervalSec * static_cast<float>(i), i);
 		}

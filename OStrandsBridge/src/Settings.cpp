@@ -133,7 +133,7 @@ namespace PPBOS
 		tickHz = std::clamp(tickHz, 10.0f, 90.0f);
 		raysPerPulse = std::clamp(raysPerPulse, 1, 8);
 		maxDecalsPerPulse = std::clamp(maxDecalsPerPulse, 1, 8);
-		climaxStrokeU = std::max(climaxStrokeU, 1.0f);
+		climaxStrokeU = (std::max)(climaxStrokeU, 1.0f);
 
 		IniMap os;
 		ReadInto(dir / "OStrands.ini", os);
