@@ -7,6 +7,9 @@ on:
       - ".github/workflows/build-ostrands-bridge.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-2022
@@ -51,3 +54,16 @@ jobs:
         with:
           name: Precision-Physic-Bodies-with-OStrands
           path: package/
+
+      # Keep the built DLL in the branch too, so the package folder is complete without downloading an artifact.
+      # Only package/ changes here, which is outside this workflow's path filter, so the push does not re-trigger it.
+      - name: Commit the built DLL to the branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f "package/40 OStrands Bridge/SKSE/Plugins/PPB_OStrands.dll"
+          if git diff --cached --quiet; then echo "DLL unchanged"; exit 0; fi
+          git commit -m "Build: PPB_OStrands.dll from ${GITHUB_SHA::7}"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
