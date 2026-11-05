@@ -12,7 +12,9 @@ to OStrands 0.8.0:
    as a collision body, so the fluid lands on them instead of passing through.
 4. The spurts' path is swept with OStrands' own gravity and pulse count. Every NPC body the path reaches gets a
    semen decal (the game's own skinned decals, the same kind blood uses).
-5. The bridge sends the mod event `PPB_OStrands_Climax` (`numArg` = stroke travel, `sender` = the player) so
+5. A **Climax** lesser power (Magic menu → Powers) climaxes on cast, with no stroking, cooldown or magicka.
+   The DLL gives it to the player (`[General] GivePower`).
+6. The bridge sends the mod event `PPB_OStrands_Climax` (`numArg` = stroke travel, `sender` = the player) so
    other mods can react.
 
 Settings are in `SKSE/Plugins/PPB_OStrands.ini`. The file is hot-reloaded within a second and every key is
@@ -36,7 +38,7 @@ documented in it. The log is `My Games/Skyrim VR/SKSE/PPB_OStrands.log`.
 | Path | What |
 |---|---|
 | `OStrandsBridge/` | Source for `PPB_OStrands.dll` (CommonLibVR NG, CMake + vcpkg) |
-| `package/40 OStrands Bridge/PPB_OStrands.esp` | 3 forms, no masters: decal texture set, decal impact, impact set |
+| `package/40 OStrands Bridge/PPB_OStrands.esp` | Decal texture set, decal impact, impact set, and the Climax power (MGEF + SPEL); master Skyrim.esm |
 | `package/40 OStrands Bridge/textures/PPB_OStrands/` | Splat decal (2×2 atlas) + normal/specular map |
 | `package/40 OStrands Bridge/SKSE/Plugins/PPB_OStrands.ini` | Settings |
 | `tools/make_esp.py`, `tools/make_decal_textures.py` | Regenerate the ESP and textures (deterministic) |

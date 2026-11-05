@@ -565,13 +565,15 @@ body, so the fluid lands on them instead of passing through.
 The spurts' path is also swept, and every NPC it reaches gets a semen decal (the game's own skinned
 decals, like blood).
 
+You also get a "Climax" lesser power (Magic > Powers): cast it to climax right away, no stroking.
+
 How much stroking, the decal range and the rest are in SKSE/Plugins/PPB_OStrands.ini (hot: edits
 apply within a second).
 
 ONE SETTING IN OSTRANDS: set [Semen] Enabled = true in OStrands_User.ini (or on its SKSE Menu
 Framework page). On "auto" without OCum, OStrands only allows semen in SexLab scenes.
 
-Adds one plugin: PPB_OStrands.esp (three forms, no masters).
+Adds one plugin: PPB_OStrands.esp (decal forms + the Climax power; master: Skyrim.esm).
               </description>
               <files>
                 <folder source="40 OStrands Bridge" destination="" priority="0"/>

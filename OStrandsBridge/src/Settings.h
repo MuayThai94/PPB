@@ -9,6 +9,7 @@ namespace PPBOS
 		bool enabled = true;
 		bool debugLog = false;
 		bool notifications = true;
+		bool givePower = true;  // add the 'Climax' lesser power to the player (PPB_OStrands.esp)
 		int  testKey = 0;       // DirectInput scan code; pressing it climaxes now (bypasses the stroke meter)
 		int  testClimax = 0;    // set to 1 in the INI while playing = one climax now
 

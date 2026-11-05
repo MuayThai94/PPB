@@ -24,6 +24,8 @@ namespace PPBOS
 		float            g_lastTick = 0.0f;
 		float            g_lastIniCheck = 0.0f;
 		std::filesystem::file_time_type g_iniStamp{};
+		RE::SpellItem*   g_power = nullptr;  // PPB_OStrands.esp 0x804 "Climax" lesser power
+		float            g_lastPowerCheck = -100.0f;
 
 		void Notify(const char* a_text)
 		{
@@ -110,6 +112,14 @@ namespace PPBOS
 			if (auto* ui = RE::UI::GetSingleton(); ui && ui->GameIsPaused()) {
 				return;
 			}
+			// keep the Climax power on the player (new game, old save, or after a respec mod removed it)
+			if (g_power && Settings::Get().givePower && now - g_lastPowerCheck >= 5.0f) {
+				g_lastPowerCheck = now;
+				if (auto* player = RE::PlayerCharacter::GetSingleton(); player && !player->HasSpell(g_power)) {
+					player->AddSpell(g_power);
+					logger::info("gave the player the Climax power ({:08X})", g_power->GetFormID());
+				}
+			}
 			StrokeMeter::Tick(now, dt, &OnStrokeClimax);
 			PathDecals::Tick(now);
 		}
@@ -159,6 +169,27 @@ namespace PPBOS
 			}
 		};
 
+		// The "Climax" lesser power: casting it climaxes now, bypassing the stroke meter.
+		class SpellCastSink : public RE::BSTEventSink<RE::TESSpellCastEvent>
+		{
+		public:
+			static SpellCastSink* Get()
+			{
+				static SpellCastSink s;
+				return &s;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESSpellCastEvent* a_event, RE::BSTEventSource<RE::TESSpellCastEvent>*) override
+			{
+				if (a_event && g_power && a_event->spell == g_power->GetFormID() &&
+					a_event->object.get() == RE::PlayerCharacter::GetSingleton()) {
+					logger::info("Climax power cast");
+					SKSE::GetTaskInterface()->AddTask([] { TestClimax("Climax power"); });
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+
 		// PPB's own announcement: hand released the groin at full erection.
 		class ModEventSink : public RE::BSTEventSink<SKSE::ModCallbackEvent>
 		{
@@ -197,6 +228,11 @@ namespace PPBOS
 				PathDecals::Init();
 				if (auto* src = SKSE::GetModCallbackEventSource()) {
 					src->AddEventSink(ModEventSink::Get());
+				}
+				g_power = RE::TESDataHandler::GetSingleton()->LookupForm<RE::SpellItem>(0x804, "PPB_OStrands.esp");
+				logger::info("Climax power: {}", g_power ? "found in PPB_OStrands.esp" : "NOT FOUND - is PPB_OStrands.esp enabled?");
+				if (auto* holder = RE::ScriptEventSourceHolder::GetSingleton()) {
+					holder->AddEventSink<RE::TESSpellCastEvent>(SpellCastSink::Get());
 				}
 				if (auto* input = RE::BSInputDeviceManager::GetSingleton()) {
 					input->AddEventSink(InputSink::Get());

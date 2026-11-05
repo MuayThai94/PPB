@@ -5,8 +5,11 @@
     0x801  IPCT  PPBOS_SemenImpact      decal-only impact (no model, silent) using the texture set
     0x802  IPDS  PPBOS_SemenImpactSet   EMPTY on disk; PPB_OStrands.dll maps every material type to 0x801 at
                                         load, so no Skyrim.esm material FormIDs are hard-coded here
+    0x803  MGEF  PPBOS_ClimaxEffect     script-archetype effect with no script: it only marks the cast
+    0x804  SPEL  PPBOS_ClimaxPower      "Climax" lesser power (no cooldown, no magicka); the DLL gives it to the
+                                        player and climaxes when the player casts it
 
-The plugin has no masters, so its own forms carry load-order byte 00 inside the file.
+Master: Skyrim.esm (only for the power's VoiceEquip slot), so the plugin's own forms carry byte 01 in the file.
 
 Usage:  python3 make_esp.py <output.esp>
 """
@@ -46,7 +49,9 @@ DECAL_ALPHA_BLENDING = 0x02
 # Sizes are in game units (1u ~ 1.43 cm): a splat 4-9 u wide reads as a spurt landing on skin.
 DODT = decal_data(4.0, 9.0, 4.0, 9.0, 10.0, 60.0, 4.0, 0, DECAL_ALPHA_BLENDING, (255, 255, 255, 255))
 
-TXST_ID, IPCT_ID, IPDS_ID = 0x800, 0x801, 0x802
+OWN = 0x01000000                     # load-order byte of our own forms (one master before us)
+TXST_ID, IPCT_ID, IPDS_ID, MGEF_ID, SPEL_ID = (OWN | n for n in (0x800, 0x801, 0x802, 0x803, 0x804))
+VOICE_EQUIP = 0x00025BEE              # Skyrim.esm EquipType 'VoiceEquip' - powers go in the shout slot
 
 
 def build() -> bytes:
@@ -68,11 +73,39 @@ def build() -> bytes:
 
     ipds = record(b'IPDS', IPDS_ID, sub(b'EDID', zstr('PPBOS_SemenImpactSet')))
 
-    groups = [group(b'TXST', [txst]), group(b'IPCT', [ipct]), group(b'IPDS', [ipds])]
+    # MGEF DATA, 0x98 bytes. Script archetype, fire and forget, self, silent, no duration/magnitude/area, painless.
+    no_av = 0xFFFFFFFF
+    mgef_data = struct.pack('<IfIIIHH', 0x00000E00 | 0x04000000, 0.0, 0, no_av, no_av, 0, 0)
+    mgef_data += struct.pack('<IfIIIIffffIi', 0, 0.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 1, -1)   # light..primary AV
+    mgef_data += struct.pack('<IIIIi', 0, 0, 1, 0, -1)                                         # proj, expl, F&F, self, 2nd AV
+    mgef_data += struct.pack('<IIIfIfIIIIIIIff', 0, 0, 0, 0.0, 0, 1.0, 0, 0, 0, 0, 0, 0, 2, 0.0, 0.0)
+    assert len(mgef_data) == 0x98, len(mgef_data)
+    mgef = record(b'MGEF', MGEF_ID,
+                  sub(b'EDID', zstr('PPBOS_ClimaxEffect')) +
+                  sub(b'FULL', zstr('Climax')) +
+                  sub(b'DATA', mgef_data) +
+                  sub(b'DNAM', zstr('Climax now (PPB OStrands).')))
+
+    # SPIT: cost, flags (1 = manual cost -> 0 magicka), type 3 = lesser power, charge time, cast F&F, target self,
+    #       cast duration, range, half-cost perk
+    spel = record(b'SPEL', SPEL_ID,
+                  sub(b'EDID', zstr('PPBOS_ClimaxPower')) +
+                  sub(b'OBND', b'\0' * 12) +
+                  sub(b'FULL', zstr('Climax')) +
+                  sub(b'ETYP', struct.pack('<I', VOICE_EQUIP)) +
+                  sub(b'DESC', zstr('Climax now: OStrands semen from your tip, decals on the NPCs it lands on.')) +
+                  sub(b'SPIT', struct.pack('<IIIfIIffI', 0, 1, 3, 0.0, 1, 0, 0.0, 0.0, 0)) +
+                  sub(b'EFID', struct.pack('<I', MGEF_ID)) +
+                  sub(b'EFIT', struct.pack('<fII', 0.0, 0, 0)))
+
+    groups = [group(b'TXST', [txst]), group(b'IPCT', [ipct]), group(b'IPDS', [ipds]),
+              group(b'MGEF', [mgef]), group(b'SPEL', [spel])]
 
     header = record(b'TES4', 0,
-                    sub(b'HEDR', struct.pack('<fiI', HEDR_VERSION, 6, 0x803)) +
+                    sub(b'HEDR', struct.pack('<fiI', HEDR_VERSION, 10, 0x805)) +
                     sub(b'CNAM', zstr('PPB OStrands Bridge')) +
+                    sub(b'MAST', zstr('Skyrim.esm')) +
+                    sub(b'DATA', struct.pack('<Q', 0)) +
                     sub(b'SNAM', zstr('Decal forms for the PPB -> OStrands bridge (PPB_OStrands.dll).')))
     return header + b''.join(groups)
 

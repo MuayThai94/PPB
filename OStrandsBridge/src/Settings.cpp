@@ -99,6 +99,7 @@ namespace PPBOS
 		Read(ini, "general.Enabled", enabled);
 		Read(ini, "general.DebugLog", debugLog);
 		Read(ini, "general.Notifications", notifications);
+		Read(ini, "general.GivePower", givePower);
 		Read(ini, "general.TestKey", testKey);
 		Read(ini, "general.TestClimax", testClimax);
 
