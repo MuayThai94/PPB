@@ -183,6 +183,22 @@ namespace PPBOS::OStrandsLink
 			}
 		}
 
+		{
+			// OStrands_User.ini may have been edited since the game started - read it again before judging it
+			auto& os = Settings::Get().ostrands;
+			Settings::Get().Load();
+			logger::info("OStrands config now: [General] Enabled={} DebugLog={} [Semen] Enabled={}", os.enabled, os.debugLog, os.semenEnabled);
+			if (!os.enabled) {
+				logger::warn("OStrands: [General] Enabled = false - OStrands drops every climax");
+			}
+			if (os.semenEnabled != "true" && os.semenEnabled != "1") {
+				logger::warn("OStrands: [Semen] Enabled = {} - unless OCum is installed OStrands will refuse this climax. Set it to true.", os.semenEnabled);
+			}
+			if (!os.debugLog) {
+				logger::info("OStrands: its own DebugLog is off, so OStrands.log will NOT say if it refuses. Set [General] DebugLog = true in OStrands_User.ini to see why.");
+			}
+		}
+
 		const auto who = a_actor->GetHandle().native_handle();
 		g_queueClimax(fm, Settings::Get().threadId, who, &pairs, &bodies);
 		// both vectors were moved into OStrands' queue and are now empty; their destructors are no-ops

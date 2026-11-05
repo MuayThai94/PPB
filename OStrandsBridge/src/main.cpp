@@ -61,9 +61,15 @@ namespace PPBOS
 			if (auto* src = SKSE::GetModCallbackEventSource()) {
 				src->SendEvent(&ev);
 			}
-			if (!fluid) {
-				Notify("PPB OStrands: climax - OStrands not available, see PPB_OStrands.log");
-			}
+			// always say that the trigger fired: if this shows and no semen appears, the problem is on OStrands' side
+			Notify(fluid ? "PPB OStrands: climax" : "PPB OStrands: climax - OStrands not available, see PPB_OStrands.log");
+		}
+
+		void TestClimax(const char* a_why)
+		{
+			StrokeMeter::Reset();
+			StrokeMeter::StartCooldown(Now());
+			Climax(0.0f, a_why);
 		}
 
 		void OnStrokeClimax(float a_meter) { Climax(a_meter, "stroke"); }
@@ -80,8 +86,12 @@ namespace PPBOS
 				const bool first = g_iniStamp == std::filesystem::file_time_type{};
 				g_iniStamp = stamp;
 				if (!first) {
+					const int before = Settings::Get().testClimax;
 					Settings::Get().Load();
 					logger::info("PPB_OStrands.ini changed - reloaded");
+					if (Settings::Get().testClimax == 1 && before != 1) {
+						TestClimax("TestClimax = 1 in the INI");
+					}
 				}
 			}
 		}
@@ -117,6 +127,37 @@ namespace PPBOS
 				}
 			}
 		}
+
+		// [General] TestKey: climax on a key press, bypassing the stroke meter (tells a trigger problem from an
+		// OStrands problem in one press).
+		class InputSink : public RE::BSTEventSink<RE::InputEvent*>
+		{
+		public:
+			static InputSink* Get()
+			{
+				static InputSink s;
+				return &s;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) override
+			{
+				const int key = Settings::Get().testKey;
+				if (!a_event || key <= 0) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				for (auto* e = *a_event; e; e = e->next) {
+					if (e->GetEventType() != RE::INPUT_EVENT_TYPE::kButton || e->GetDevice() != RE::INPUT_DEVICE::kKeyboard) {
+						continue;
+					}
+					const auto* b = e->AsButtonEvent();
+					if (b && b->IsDown() && static_cast<int>(b->GetIDCode()) == key) {
+						logger::info("TestKey {} pressed", key);
+						SKSE::GetTaskInterface()->AddTask([] { TestClimax("TestKey"); });
+					}
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
 
 		// PPB's own announcement: hand released the groin at full erection.
 		class ModEventSink : public RE::BSTEventSink<SKSE::ModCallbackEvent>
@@ -156,6 +197,9 @@ namespace PPBOS
 				PathDecals::Init();
 				if (auto* src = SKSE::GetModCallbackEventSource()) {
 					src->AddEventSink(ModEventSink::Get());
+				}
+				if (auto* input = RE::BSInputDeviceManager::GetSingleton()) {
+					input->AddEventSink(InputSink::Get());
 				}
 				if (!g_running.exchange(true)) {
 					std::thread(TickThread).detach();

@@ -99,6 +99,8 @@ namespace PPBOS
 		Read(ini, "general.Enabled", enabled);
 		Read(ini, "general.DebugLog", debugLog);
 		Read(ini, "general.Notifications", notifications);
+		Read(ini, "general.TestKey", testKey);
+		Read(ini, "general.TestClimax", testClimax);
 
 		Read(ini, "trigger.GripRadiusU", gripRadiusU);
 		Read(ini, "trigger.MinStrokeSpeedU", minStrokeSpeedU);
@@ -139,6 +141,8 @@ namespace PPBOS
 		ReadInto(dir / "OStrands.ini", os);
 		ReadInto(dir / "OStrands_User.ini", os);  // read second: the user's file wins, as in OStrands
 		Read(os, "semen.Enabled", ostrands.semenEnabled);
+		Read(os, "general.Enabled", ostrands.enabled);
+		Read(os, "general.DebugLog", ostrands.debugLog);
 		Read(os, "semen.Pulses", ostrands.pulses);
 		Read(os, "physics.Gravity", ostrands.gravity);
 

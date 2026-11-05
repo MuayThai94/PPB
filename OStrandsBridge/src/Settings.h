@@ -9,12 +9,14 @@ namespace PPBOS
 		bool enabled = true;
 		bool debugLog = false;
 		bool notifications = true;
+		int  testKey = 0;       // DirectInput scan code; pressing it climaxes now (bypasses the stroke meter)
+		int  testClimax = 0;    // set to 1 in the INI while playing = one climax now
 
 		// [Trigger]
 		float gripRadiusU = 7.0f;
-		float minStrokeSpeedU = 6.0f;
+		float minStrokeSpeedU = 4.0f;
 		float maxStrokeSpeedU = 400.0f;
-		float climaxStrokeU = 400.0f;
+		float climaxStrokeU = 150.0f;
 		float decayPerSec = 15.0f;
 		float decayDelaySec = 3.0f;
 		bool  requireErect = true;
@@ -45,6 +47,8 @@ namespace PPBOS
 		struct OStrandsView
 		{
 			std::string semenEnabled = "auto";  // true / false / auto
+			bool        enabled = true;         // [General] Enabled - off = OStrands drops every queued climax
+			bool        debugLog = false;       // [General] DebugLog - OStrands only logs a REFUSED climax when on
 			int         pulses = 5;
 			float       gravity = 350.0f;
 		} ostrands;

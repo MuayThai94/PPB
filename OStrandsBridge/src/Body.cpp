@@ -68,7 +68,7 @@ namespace PPBOS::Body
 			if (!tip) {
 				continue;
 			}
-			Schlong s{ base->world.translate, tip->world.translate, {}, 0.0f, tipName };
+			Schlong s{ base->world.translate, tip->world.translate, {}, 0.0f, tipName, firstPerson };
 			const auto axis = s.tip - s.base;
 			s.length = axis.Length();
 			if (s.length < 1.0f) {

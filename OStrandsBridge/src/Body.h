@@ -17,6 +17,7 @@ namespace PPBOS::Body
 		RE::NiPoint3 dir;   // unit, base -> tip, i.e. the way it points
 		float        length;
 		const char*  tipNode;
+		bool         firstPerson;  // found on the first-person skeleton (no third-person Gen chain)
 	};
 
 	RE::NiAVObject* Find(RE::NiAVObject* a_root, const char* a_name);
