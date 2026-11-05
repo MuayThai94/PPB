@@ -10,6 +10,11 @@ on:
 permissions:
   contents: write
 
+# A newer push supersedes a running build on the same branch.
+concurrency:
+  group: build-ostrands-bridge-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-2022
@@ -60,10 +65,19 @@ jobs:
       - name: Commit the built DLL to the branch
         shell: bash
         run: |
+          DLL="package/40 OStrands Bridge/SKSE/Plugins/PPB_OStrands.dll"
+          cp "$DLL" "$RUNNER_TEMP/PPB_OStrands.dll"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f "package/40 OStrands Bridge/SKSE/Plugins/PPB_OStrands.dll"
+          git fetch origin "${GITHUB_REF_NAME}"
+          # A newer push changed the bridge source after this run started: its own run will commit, not this one.
+          if ! git diff --quiet "${GITHUB_SHA}" "origin/${GITHUB_REF_NAME}" -- OStrandsBridge; then
+            echo "Bridge source changed since ${GITHUB_SHA::7}; leaving the DLL to the newer run"; exit 0
+          fi
+          # Start from the branch tip (another run may have committed a DLL meanwhile) and put this build on top.
+          git reset --hard "origin/${GITHUB_REF_NAME}"
+          cp "$RUNNER_TEMP/PPB_OStrands.dll" "$DLL"
+          git add -f "$DLL"
           if git diff --cached --quiet; then echo "DLL unchanged"; exit 0; fi
           git commit -m "Build: PPB_OStrands.dll from ${GITHUB_SHA::7}"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
